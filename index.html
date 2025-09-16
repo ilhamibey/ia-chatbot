@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Chatbot IA</title>
   <style>
     body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      font-family: "Segoe UI", sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
       color: #fff;
       margin: 0;
@@ -15,7 +15,7 @@
       align-items: center;
     }
     .chat-container {
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0,0,0,0.6);
       border-radius: 20px;
       padding: 20px;
       width: 400px;
@@ -28,71 +28,62 @@
       flex: 1;
       overflow-y: auto;
       margin-bottom: 15px;
-      padding-right: 5px;
     }
     .message {
       padding: 10px 14px;
       margin: 6px 0;
       border-radius: 12px;
       max-width: 80%;
-      line-height: 1.4;
     }
-    .user {
-      background: #4cafef;
-      align-self: flex-end;
-    }
-    .bot {
-      background: #444;
-      align-self: flex-start;
-    }
-    .input-row {
-      display: flex;
-      gap: 10px;
-    }
+    .user { background: #4cafef; align-self: flex-end; }
+    .bot { background: #444; align-self: flex-start; }
+    .input-row { display: flex; gap: 10px; }
     input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 12px;
-      border: none;
-      outline: none;
-      font-size: 14px;
+      flex: 1; padding: 10px;
+      border-radius: 12px; border: none;
+      outline: none; font-size: 14px;
     }
     button {
-      background: #4cafef;
-      border: none;
-      border-radius: 12px;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-weight: bold;
-      color: white;
-      transition: background 0.2s ease;
+      background: #4cafef; border: none;
+      border-radius: 12px; padding: 10px 16px;
+      cursor: pointer; font-weight: bold; color: white;
     }
-    button:hover {
-      background: #3a8fd9;
-    }
+    button:hover { background: #3a8fd9; }
   </style>
 </head>
 <body>
-  <h2>Chatbot IA</h2>
-  <div id="chat"></div>
-  <input id="userInput" placeholder="Pose ta question..." />
-  <button onclick="askAI()">Envoyer</button>
+  <div class="chat-container">
+    <div id="chat" class="chat-box"></div>
+    <div class="input-row">
+      <input id="question" placeholder="Écris ton message..." onkeydown="if(event.key==='Enter'){sendMessage()}"/>
+      <button onclick="sendMessage()">➤</button>
+    </div>
+  </div>
 
   <script>
-    async function askAI() {
-      const input = document.getElementById("userInput");
-      const chat = document.getElementById("chat");
+    const chat = document.getElementById("chat");
 
-      const response = await fetch("/api/chat", {
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.innerText = text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const question = document.getElementById("question").value.trim();
+      if (!question) return;
+      addMessage(question, "user");
+      document.getElementById("question").value = "";
+
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input.value })
+        body: JSON.stringify({ message: question })
       });
-
-      const data = await response.json();
-      chat.innerHTML += `<p><b>Moi:</b> ${input.value}</p>`;
-      chat.innerHTML += `<p><b>IA:</b> ${data.reply}</p>`;
-      input.value = "";
+      const data = await res.json();
+      addMessage(data.reply || "⚠️ Erreur : pas de réponse.", "bot");
     }
   </script>
 </body>
