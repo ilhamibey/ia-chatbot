@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot IA</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    #chat { border: 1px solid #ccc; padding: 1rem; min-height: 200px; margin-bottom: 1rem; }
+    p { margin: .3rem 0; }
+  </style>
+</head>
+<body>
+  <h2>Chatbot IA</h2>
+  <div id="chat"></div>
+  <input id="userInput" placeholder="Pose ta question..." />
+  <button onclick="askAI()">Envoyer</button>
+
+  <script>
+    async function askAI() {
+      const input = document.getElementById("userInput");
+      const chat = document.getElementById("chat");
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input.value })
+      });
+
+      const data = await response.json();
+      chat.innerHTML += `<p><b>Moi:</b> ${input.value}</p>`;
+      chat.innerHTML += `<p><b>IA:</b> ${data.reply}</p>`;
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
